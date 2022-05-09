@@ -79,7 +79,8 @@ rates %>%
   mutate(est_entry_slip = if_else(diff>=0,(BB_bid-ftx_ask)/ftx_ask, (ftx_bid-BB_ask)/BB_ask),
          est_exit_slip = if_else(diff>=0,(ftx_bid-BB_ask)/BB_ask, (BB_bid-ftx_ask)/ftx_ask),
          entry_and_exit = est_entry_slip + est_exit_slip,
-         est_1w_rtn = est_entry_slip + est_exit_slip + 21*abs_diff) %>% 
+         est_1w_rtn = est_entry_slip + est_exit_slip + 21*abs_diff,
+         est_1w_rtn_fees = est_1w_rtn_fees - (4*0.001)) %>% 
   mutate_if(is.numeric, ~100*.) %>% 
   mutate(BB_bid = BB_bid/100,
          BB_ask = BB_ask/100,
