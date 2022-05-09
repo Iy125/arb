@@ -1,4 +1,5 @@
 library(dplyr)
+library(writexl)
 
 ########### Check current funding #################
 ##Positive rate = longs are paying shorts; negative rate = shorts are paying longs
@@ -17,7 +18,7 @@ GetBybitFundingRates = function(){
            last_price = as.numeric(last_price),
            midpoint_funding = (funding_rate+predicted_funding_rate)/2) %>% 
     arrange(desc(midpoint_funding))
-    return(table)
+  return(table)
 }
 
 ## Pull FTX Funding Rates - funds hourly, so multiply by 8 for comparison
@@ -109,5 +110,5 @@ rates %>%
          fees,
          leverage_cost,
          net_est_1w_rtn) %>%
-  arrange(-abs_diff) %>% 
+  arrange(-abs_diff) %>%
   View
