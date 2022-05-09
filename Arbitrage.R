@@ -2,6 +2,7 @@ library(dplyr)
 
 ########### Check current funding #################
 ##Positive rate = longs are paying shorts; negative rate = shorts are paying longs
+## Higher rate - long; lower rate - short
 
 GetBybitFundingRates = function(){
   response = httr::GET("https://api.bybit.com/v2/public/tickers")
