@@ -17,8 +17,7 @@ GetBybitFundingRates = function(){
            last_price = as.numeric(last_price),
            midpoint_funding = (funding_rate+predicted_funding_rate)/2) %>% 
     arrange(desc(midpoint_funding))
-  
-  return(table)
+    return(table)
 }
 
 ## Pull FTX Funding Rates - funds hourly, so multiply by 8 for comparison
@@ -83,8 +82,10 @@ rates %>%
   mutate(est_entry_slip = if_else(diff>=0,(BB_bid-ftx_ask)/ftx_ask, (ftx_bid-BB_ask)/BB_ask),
          est_exit_slip = if_else(diff>=0,(ftx_bid-BB_ask)/BB_ask, (BB_bid-ftx_ask)/ftx_ask),
          entry_and_exit = est_entry_slip + est_exit_slip,
-         fees = 0.001*4,
-         est_1w_rtn = est_entry_slip + est_exit_slip + 21*abs_diff - fees) %>% 
+         fees = -0.001*4,
+         leverage_cost = -0.0003*7,
+         est_1w_rtn = est_entry_slip + est_exit_slip + (3*7)*abs_diff,
+         net_est_1w_rtn = est_1w_rtn+ fees + leverage_cost) %>% 
   mutate_if(is.numeric, ~100*.) %>% 
   mutate(BB_bid = BB_bid/100,
          BB_ask = BB_ask/100,
@@ -104,7 +105,9 @@ rates %>%
          est_entry_slip,
          est_exit_slip,
          entry_and_exit,
+         est_1w_rtn,
          fees,
-         est_1w_rtn) %>%
+         leverage_cost,
+         net_est_1w_rtn) %>%
   arrange(-abs_diff) %>% 
   View
