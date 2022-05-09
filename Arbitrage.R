@@ -4,6 +4,8 @@ library(dplyr)
 ##Positive rate = longs are paying shorts; negative rate = shorts are paying longs
 ## Higher rate - long; lower rate - short
 
+
+## Pull Bybit Funding Rates - funds every 8 hours
 GetBybitFundingRates = function(){
   response = httr::GET("https://api.bybit.com/v2/public/tickers")
   content = httr::content(response)
@@ -19,6 +21,7 @@ GetBybitFundingRates = function(){
   return(table)
 }
 
+## Pull FTX Funding Rates - funds hourly, so multiply by 8 for comparison
 GetFTXFundingRates = function(){
   ts = as.integer(Sys.time())-3600
   url = paste0("https://ftx.com/api/funding_rates?start_time=",ts)
@@ -47,6 +50,7 @@ GetFTXPredictedFundingRates = function(){
     mutate(adjustedNextFundingRate = nextFundingRate*8)
 }
 
+#Join the corresponding funding rates together / clean data
 CompareBybitVsFTXFundingRates = function(){
   bybit_funding = GetBybitFundingRates() %>% 
     select(symbol, "BB_funding_rate" = funding_rate, "BB_predicted_funding_rate" = predicted_funding_rate, next_funding_time, "BB_midpoint_funding" = midpoint_funding, 
@@ -79,8 +83,8 @@ rates %>%
   mutate(est_entry_slip = if_else(diff>=0,(BB_bid-ftx_ask)/ftx_ask, (ftx_bid-BB_ask)/BB_ask),
          est_exit_slip = if_else(diff>=0,(ftx_bid-BB_ask)/BB_ask, (BB_bid-ftx_ask)/ftx_ask),
          entry_and_exit = est_entry_slip + est_exit_slip,
-         est_1w_rtn = est_entry_slip + est_exit_slip + 21*abs_diff,
-         est_1w_rtn_fees = est_1w_rtn_fees - (4*0.001)) %>% 
+         fees = 0.001*4,
+         est_1w_rtn = est_entry_slip + est_exit_slip + 21*abs_diff - fees) %>% 
   mutate_if(is.numeric, ~100*.) %>% 
   mutate(BB_bid = BB_bid/100,
          BB_ask = BB_ask/100,
@@ -100,6 +104,7 @@ rates %>%
          est_entry_slip,
          est_exit_slip,
          entry_and_exit,
+         fees,
          est_1w_rtn) %>%
   arrange(-abs_diff) %>% 
   View
